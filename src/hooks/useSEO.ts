@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-const SITE_NAME = '技术博客'
+const SITE_NAME = 'The_Blog'
 
 export function useSEO(title?: string, description?: string) {
   useEffect(() => {

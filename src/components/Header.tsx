@@ -47,7 +47,7 @@ function Header() {
             className="text-xl font-bold"
             style={{ color: 'var(--text-primary)' }}
           >
-            技术博客
+            The_Blog
           </Link>
 
           <div className="hidden md:flex items-center gap-0.5">
