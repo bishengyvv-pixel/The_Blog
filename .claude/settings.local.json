@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vite:*)",
+      "Bash(npm install:*)",
+      "WebFetch(domain:raw.githubusercontent.com)"
+    ]
+  }
+}
