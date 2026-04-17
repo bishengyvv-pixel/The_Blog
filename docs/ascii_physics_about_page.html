@@ -1,0 +1,252 @@
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: transparent; }
+#about-container {
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+  padding: 2rem 1.5rem;
+  min-height: 600px;
+  position: relative;
+  overflow: hidden;
+}
+canvas#physics-canvas {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+}
+.hero-ascii {
+  position: relative; z-index: 2;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.ascii-name {
+  font-size: clamp(10px, 1.5vw, 13px);
+  line-height: 1.2;
+  white-space: pre;
+  color: var(--color-text-primary);
+  display: inline-block;
+  cursor: pointer;
+  transition: transform 0.1s;
+  user-select: none;
+}
+.ascii-name:hover { transform: scale(1.02); }
+.ripple-char {
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(.17,.67,.33,1.3), color 0.3s;
+}
+.info-grid {
+  position: relative; z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.info-card {
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.info-card:hover { border-color: var(--color-border-secondary); transform: translateY(-2px); }
+.card-ascii { font-size: 11px; line-height: 1.3; color: var(--color-text-secondary); margin-bottom: 8px; white-space: pre; }
+.card-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; letter-spacing: 0.05em; text-transform: uppercase; }
+.card-value { font-size: 14px; color: var(--color-text-primary); font-weight: 500; }
+.physics-btn {
+  position: relative; z-index: 2;
+  display: inline-block;
+  margin: 0.5rem;
+  padding: 8px 16px;
+  background: transparent;
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.physics-btn:hover { background: var(--color-background-secondary); }
+.btn-row { text-align: center; margin: 1rem 0; }
+.ascii-subtitle {
+  position: relative; z-index: 2;
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 0.5rem;
+  letter-spacing: 0.08em;
+}
+</style>
+
+<div id="about-container">
+  <canvas id="physics-canvas"></canvas>
+  <div class="hero-ascii">
+    <div class="ascii-name" id="ascii-name"></div>
+    <div class="ascii-subtitle">// fullstack dev &amp; digital tinkerer</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="physics-btn" onclick="explode()">[ explode ]</button>
+    <button class="physics-btn" onclick="rain()">[ rain chars ]</button>
+    <button class="physics-btn" onclick="clearParticles()">[ clear ]</button>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card" onclick="cardPop(this)">
+      <div class="card-ascii">┌──────────────┐
+│  >&gt; skills   │
+└──────────────┘</div>
+      <div class="card-label">stack</div>
+      <div class="card-value">React · Node · Go</div>
+    </div>
+    <div class="info-card" onclick="cardPop(this)">
+      <div class="card-ascii">┌──────────────┐
+│  ★ location  │
+└──────────────┘</div>
+      <div class="card-label">based in</div>
+      <div class="card-value">Singapore 🇸🇬</div>
+    </div>
+    <div class="info-card" onclick="cardPop(this)">
+      <div class="card-ascii">┌──────────────┐
+│  ✉ contact   │
+└──────────────┘</div>
+      <div class="card-label">email</div>
+      <div class="card-value">hi@example.com</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ASCII_NAME = [
+" ██╗ ██╗  █████╗ ███╗   ██╗ ██████╗ ",
+"  ██╔╝██╔╝ ██╔══██╗████╗  ██║██╔════╝ ",
+"  ╚██╗╚██╗ ███████║██╔██╗ ██║██║  ███╗ ",
+"  ██╔╝██╔╝ ██╔══██║██║╚██╗██║██║   ██║ ",
+" ██╔╝██╔╝  ██║  ██║██║ ╚████║╚██████╔╝ ",
+" ╚═╝ ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝  "
+];
+
+const nameEl = document.getElementById('ascii-name');
+nameEl.textContent = ASCII_NAME.join('\n');
+
+const chars = Array.from(nameEl.querySelectorAll('span')) ;
+
+nameEl.innerHTML = ASCII_NAME.map((line, li) =>
+  line.split('').map((c, ci) =>
+    `<span class="ripple-char" data-row="${li}" data-col="${ci}">${c === ' ' ? '&nbsp;' : c}</span>`
+  ).join('')
+).join('\n');
+
+const rippleChars = nameEl.querySelectorAll('.ripple-char');
+
+nameEl.addEventListener('mousemove', e => {
+  const rect = nameEl.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  rippleChars.forEach(span => {
+    const sr = span.getBoundingClientRect();
+    const cx = sr.left + sr.width/2 - rect.left;
+    const cy = sr.top + sr.height/2 - rect.top;
+    const dist = Math.hypot(mx - cx, my - cy);
+    const force = Math.max(0, 1 - dist / 60);
+    const angle = Math.atan2(cy - my, cx - mx);
+    const tx = Math.cos(angle) * force * 10;
+    const ty = Math.sin(angle) * force * 10;
+    span.style.transform = `translate(${tx}px, ${ty}px) scale(${1 + force * 0.3})`;
+    span.style.color = force > 0.3
+      ? `hsl(${260 + force * 80}, 70%, 65%)`
+      : 'var(--color-text-primary)';
+  });
+});
+nameEl.addEventListener('mouseleave', () => {
+  rippleChars.forEach(s => { s.style.transform = ''; s.style.color = ''; });
+});
+
+const canvas = document.getElementById('physics-canvas');
+const ctx = canvas.getContext('2d');
+let W = 0, H = 0, particles = [];
+const POOL = '!@#$%&*()[]{}|;:,./<>?~`ABCDEFGHIJKLMNabcdefghijklmn0123456789░▒▓█▄▀■□▪▫';
+
+function resize() {
+  const c = document.getElementById('about-container');
+  W = canvas.width = c.offsetWidth;
+  H = canvas.height = c.offsetHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+function rndChar() { return POOL[Math.floor(Math.random() * POOL.length)]; }
+
+function mkParticle(x, y, vx, vy, col) {
+  return { x, y, vx, vy, char: rndChar(), col: col || `hsl(${Math.random()*60+240},70%,65%)`,
+    alpha: 1, life: 1, size: Math.random() * 4 + 10, spin: (Math.random()-0.5)*0.2,
+    angle: 0, bounce: 0.55 + Math.random() * 0.2, friction: 0.98 };
+}
+
+function explode() {
+  const cx = W / 2, cy = 80;
+  for (let i = 0; i < 60; i++) {
+    const a = (i / 60) * Math.PI * 2, spd = Math.random() * 8 + 3;
+    particles.push(mkParticle(cx, cy, Math.cos(a)*spd, Math.sin(a)*spd - 4));
+  }
+}
+
+function rain() {
+  for (let i = 0; i < 40; i++) {
+    setTimeout(() => {
+      particles.push(mkParticle(Math.random()*W, -10, (Math.random()-0.5)*2, Math.random()*3+2));
+    }, i * 50);
+  }
+}
+
+function clearParticles() { particles = []; }
+
+canvas.addEventListener('click', e => {
+  const r = canvas.getBoundingClientRect();
+  const mx = e.clientX - r.left, my = e.clientY - r.top;
+  for (let i = 0; i < 15; i++) {
+    const a = Math.random() * Math.PI * 2, spd = Math.random() * 5 + 2;
+    particles.push(mkParticle(mx, my, Math.cos(a)*spd, Math.sin(a)*spd-3));
+  }
+});
+
+const GRAVITY = 0.35;
+function loop() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+  particles = particles.filter(p => p.alpha > 0.02 && p.y < H + 50);
+  for (const p of particles) {
+    p.vy += GRAVITY;
+    p.vx *= p.friction;
+    p.x += p.vx; p.y += p.vy;
+    p.angle += p.spin;
+    if (p.y > H - 20) { p.y = H - 20; p.vy *= -p.bounce; p.vx *= 0.85; if (Math.abs(p.vy) < 0.5) p.vy = 0; }
+    if (p.x < 0) { p.x = 0; p.vx *= -0.7; }
+    if (p.x > W) { p.x = W; p.vx *= -0.7; }
+    p.life -= 0.008; p.alpha = Math.min(p.alpha, p.life);
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.angle);
+    ctx.globalAlpha = p.alpha;
+    ctx.font = `${p.size}px monospace`;
+    ctx.fillStyle = p.col;
+    ctx.fillText(p.char, 0, 0);
+    ctx.restore();
+  }
+  ctx.restore();
+  requestAnimationFrame(loop);
+}
+loop();
+
+function cardPop(el) {
+  el.style.transform = 'scale(0.95)';
+  const r = el.getBoundingClientRect();
+  const cr = canvas.getBoundingClientRect();
+  const cx = r.left + r.width/2 - cr.left, cy = r.top + r.height/2 - cr.top;
+  for (let i = 0; i < 12; i++) {
+    const a = Math.random()*Math.PI*2, spd = Math.random()*5+2;
+    particles.push(mkParticle(cx, cy, Math.cos(a)*spd, Math.sin(a)*spd-3));
+  }
+  setTimeout(() => el.style.transform = '', 150);
+}
+</script>
