@@ -19,25 +19,52 @@ const ASCII_NAME = [
 ];
 
 const ASCII_FOR = [
-  '  ███████╗ ██████╗ ██████╗ ',
-  '    ██╔════╝██╔══██╗██╔══██╗',
-  '████╗   ██║   ██║██████╔╝',
-  ' ██╔══╝  ██║   ██║██╔══██╗',
+  '███████╗ ██████╗ ██████╗ ',
+  '██╔════╝██╔═══██╗██╔══██╗',
+  '█████╗  ██║   ██║██████╔╝',
+  '██╔══╝  ██║   ██║██╔══██╗',
   '██║     ╚██████╔╝██║  ██║',
   '╚═╝      ╚═════╝ ╚═╝  ╚═╝',
-                         
 ]
 
 const ASCII_ME = [
-  ' ██████╗ ██████╗ ',
-  ' ██╔════╝██╔═══██╗',
-  ' █████╗  ██║   ██║',
-  ' ██╔══╝  ██║   ██║',
-  ' ███████╗╚██████╔╝',
-  ' ╚══════╝ ╚═════╝ ',
+  '███╗   ███╗      ███████╗',
+  '████╗ ████║     ██╔════╝',
+  '██╔████╔██║     █████╗  ',
+  '██║╚██╔╝██║     ██╔══╝  ',
+  '██║ ╚═╝ ██║      ███████╗',
+  '╚═╝     ╚═╝      ╚══════╝',
 ]
 
-const CHAR_POOL = '!@#$%&*()[]{}|;:,./<>?~`ABCDEFGHIJKLMNabcdefghijklmn0123456789░▒▓█▄▀■□▪▫'
+const CHAR_POOL = [
+  '😀','😂','🤣','😍','🥰','😎','🤩','🥳','😜','🤯','🥺','😱','🤖','👾','💀','🎃',
+  '🚀','🌈','⚡','🔥','💥','✨','🌊','❄️','🍀','🌸','🦋','🐉','👻','🎯','💎','🎮',
+  '🍕','🍔','🍜','🍣','🧁','🍩','🍭','🧃','🍺','🎂','🍓','🥑','🍋','🍉','🥝','🫐',
+  '🦊','🐱','🐶','🐸','🐼','🦄','🦁','🐙','🦀','🐠','🦜','🐧','🦭','🦝','🐺','🦖',
+  '💻','🎵','📸','🎸','🎲','🏆','🎁','📚','🔮','🧲','💡','🔑','🗝️','🎪','🎠','🎡',
+]
+const MAX_PARTICLES = 80
+
+const EMOJI_RENDER_SIZE = 72
+const emojiCache = new Map<string, HTMLCanvasElement>()
+function getEmojiCanvas(emoji: string): HTMLCanvasElement {
+  if (emojiCache.has(emoji)) return emojiCache.get(emoji)!
+  const c = document.createElement('canvas')
+  c.width = EMOJI_RENDER_SIZE
+  c.height = EMOJI_RENDER_SIZE
+  const ctx = c.getContext('2d')!
+  ctx.font = `${EMOJI_RENDER_SIZE * 0.8}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(emoji, EMOJI_RENDER_SIZE / 2, EMOJI_RENDER_SIZE / 2)
+  emojiCache.set(emoji, c)
+  return c
+}
+
+function addParticles(arr: Particle[], newOnes: Particle[]) {
+  for (const p of newOnes) arr.push(p)
+  if (arr.length > MAX_PARTICLES) arr.splice(0, arr.length - MAX_PARTICLES)
+}
 
 const INFO_CARDS = [
   {
@@ -92,7 +119,7 @@ function mkParticle(x: number, y: number, vx: number, vy: number, color?: string
     color: color || `hsl(${Math.random() * 60 + 240}, 70%, 65%)`,
     alpha: 1,
     life: 1,
-    size: Math.random() * 4 + 10,
+    size: Math.random() * 16 + 28,
     spin: (Math.random() - 0.5) * 0.2,
     angle: 0,
     bounce: 0.55 + Math.random() * 0.2,
@@ -156,23 +183,25 @@ function PhysicsCanvas({
           p.vx *= -0.7
         }
 
-        p.life -= 0.008
+        p.life -= 0.002
         p.alpha = Math.min(p.alpha, p.life)
 
-        if (p.alpha <= 0.02 || p.y > H + 50) {
+        if (p.alpha <= 0.05 || p.y > H + 50) {
           particles.splice(i, 1)
           continue
         }
 
-        ctx.save()
-        ctx.translate(p.x, p.y)
-        ctx.rotate(p.angle)
+        const ec = getEmojiCanvas(p.char)
+        const half = p.size / 2
+        const cos = Math.cos(p.angle)
+        const sin = Math.sin(p.angle)
+        ctx.setTransform(cos, sin, -sin, cos, p.x, p.y)
         ctx.globalAlpha = p.alpha
-        ctx.font = `${p.size}px monospace`
-        ctx.fillStyle = p.color
-        ctx.fillText(p.char, 0, 0)
-        ctx.restore()
+        ctx.drawImage(ec, -half, -half, p.size, p.size)
       }
+
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.globalAlpha = 1
 
       animRef.current = requestAnimationFrame(loop)
     }
@@ -211,7 +240,14 @@ function AsciiBlock({
   color: string
   delay: number
 }) {
+  const RADIUS = 80
   const containerRef = useRef<HTMLDivElement>(null)
+  const cachedSpans = useRef<HTMLElement[]>([])
+  const spanCenters = useRef<{ cx: number; cy: number }[]>([])
+  const containerPos = useRef({ left: 0, top: 0 })
+  const rafId = useRef(0)
+  const pendingMouse = useRef({ x: 0, y: 0 })
+  const prevActive = useRef(new Set<number>())
   const [spans, setSpans] = useState<{ char: string; row: number; col: number }[]>([])
   const [visible, setVisible] = useState(false)
 
@@ -233,35 +269,81 @@ function AsciiBlock({
     setSpans(result)
   }, [lines])
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+  const computeCenters = useCallback(() => {
     if (!containerRef.current) return
-    const rect = containerRef.current.getBoundingClientRect()
-    const mx = e.clientX - rect.left
-    const my = e.clientY - rect.top
-    const allSpans = containerRef.current.querySelectorAll('.ripple-char')
-    allSpans.forEach((span) => {
-      const sr = (span as HTMLElement).getBoundingClientRect()
-      const cx = sr.left + sr.width / 2 - rect.left
-      const cy = sr.top + sr.height / 2 - rect.top
-      const dist = Math.hypot(mx - cx, my - cy)
-      const force = Math.max(0, 1 - dist / 80)
-      const angle = Math.atan2(cy - my, cx - mx)
-      const tx = Math.cos(angle) * force * 12
-      const ty = Math.sin(angle) * force * 12
-      ;(span as HTMLElement).style.transform = `translate(${tx}px, ${ty}px) scale(${1 + force * 0.4})`
-      ;(span as HTMLElement).style.color = force > 0.3
-        ? `hsl(${260 + force * 80}, 70%, 65%)`
-        : ''
+    const cr = containerRef.current.getBoundingClientRect()
+    containerPos.current = { left: cr.left, top: cr.top }
+    spanCenters.current = cachedSpans.current.map((span) => {
+      const sr = span.getBoundingClientRect()
+      return {
+        cx: sr.left + sr.width / 2 - cr.left,
+        cy: sr.top + sr.height / 2 - cr.top,
+      }
     })
   }, [])
 
-  const handleMouseLeave = useCallback(() => {
+  const updateContainerPos = useCallback(() => {
     if (!containerRef.current) return
-    const allSpans = containerRef.current.querySelectorAll('.ripple-char')
-    allSpans.forEach((span) => {
-      ;(span as HTMLElement).style.transform = ''
-      ;(span as HTMLElement).style.color = ''
+    const cr = containerRef.current.getBoundingClientRect()
+    containerPos.current = { left: cr.left, top: cr.top }
+  }, [])
+
+  useEffect(() => {
+    if (!containerRef.current) return
+    cachedSpans.current = Array.from(containerRef.current.querySelectorAll<HTMLElement>('.ripple-char'))
+    computeCenters()
+    window.addEventListener('resize', computeCenters)
+    window.addEventListener('scroll', updateContainerPos, { passive: true })
+    return () => {
+      window.removeEventListener('resize', computeCenters)
+      window.removeEventListener('scroll', updateContainerPos)
+    }
+  }, [spans, computeCenters, updateContainerPos])
+
+  const applyRipple = useCallback(() => {
+    rafId.current = 0
+    const mx = pendingMouse.current.x - containerPos.current.left
+    const my = pendingMouse.current.y - containerPos.current.top
+    const newActive = new Set<number>()
+    cachedSpans.current.forEach((span, i) => {
+      const { cx, cy } = spanCenters.current[i] ?? { cx: 0, cy: 0 }
+      const dx = mx - cx
+      const dy = my - cy
+      if (Math.abs(dx) > RADIUS || Math.abs(dy) > RADIUS) return
+      const dist = Math.hypot(dx, dy)
+      const force = Math.max(0, 1 - dist / RADIUS)
+      if (force <= 0) return
+      newActive.add(i)
+      const angle = Math.atan2(-dy, -dx)
+      const tx = Math.cos(angle) * force * 12
+      const ty = Math.sin(angle) * force * 12
+      span.style.transform = `translate(${tx}px, ${ty}px) scale(${1 + force * 0.4})`
+      span.style.color = force > 0.3 ? `hsl(${260 + force * 80}, 70%, 65%)` : ''
     })
+    prevActive.current.forEach((i) => {
+      if (!newActive.has(i)) {
+        cachedSpans.current[i].style.transform = ''
+        cachedSpans.current[i].style.color = ''
+      }
+    })
+    prevActive.current = newActive
+  }, [])
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    pendingMouse.current = { x: e.clientX, y: e.clientY }
+    if (!rafId.current) rafId.current = requestAnimationFrame(applyRipple)
+  }, [applyRipple])
+
+  const handleMouseLeave = useCallback(() => {
+    if (rafId.current) {
+      cancelAnimationFrame(rafId.current)
+      rafId.current = 0
+    }
+    prevActive.current.forEach((i) => {
+      cachedSpans.current[i].style.transform = ''
+      cachedSpans.current[i].style.color = ''
+    })
+    prevActive.current.clear()
   }, [])
 
   return (
@@ -379,18 +461,18 @@ function About() {
 
   const containerRef = useRef<HTMLDivElement>(null)
   const particlesRef = useRef<Particle[]>([])
-  const [, forceUpdate] = useState(0)
 
   const explode = useCallback(() => {
     if (!containerRef.current) return
     const cx = containerRef.current.offsetWidth / 2
     const cy = 80
+    const batch: Particle[] = []
     for (let i = 0; i < 60; i++) {
       const a = (i / 60) * Math.PI * 2
       const spd = Math.random() * 8 + 3
-      particlesRef.current.push(mkParticle(cx, cy, Math.cos(a) * spd, Math.sin(a) * spd - 4))
+      batch.push(mkParticle(cx, cy, Math.cos(a) * spd, Math.sin(a) * spd - 4))
     }
-    forceUpdate((n) => n + 1)
+    addParticles(particlesRef.current, batch)
   }, [])
 
   const rain = useCallback(() => {
@@ -398,22 +480,15 @@ function About() {
     const W = containerRef.current.offsetWidth
     for (let i = 0; i < 40; i++) {
       setTimeout(() => {
-        particlesRef.current.push(
-          mkParticle(
-            Math.random() * W,
-            -10,
-            (Math.random() - 0.5) * 2,
-            Math.random() * 3 + 2
-          )
-        )
-        forceUpdate((n) => n + 1)
+        addParticles(particlesRef.current, [
+          mkParticle(Math.random() * W, -10, (Math.random() - 0.5) * 2, Math.random() * 3 + 2),
+        ])
       }, i * 50)
     }
   }, [])
 
   const clear = useCallback(() => {
-    particlesRef.current = []
-    forceUpdate((n) => n + 1)
+    particlesRef.current.length = 0
   }, [])
 
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
@@ -421,12 +496,13 @@ function About() {
     const rect = containerRef.current.getBoundingClientRect()
     const mx = e.clientX - rect.left
     const my = e.clientY - rect.top
+    const batch: Particle[] = []
     for (let i = 0; i < 15; i++) {
       const a = Math.random() * Math.PI * 2
       const spd = Math.random() * 5 + 2
-      particlesRef.current.push(mkParticle(mx, my, Math.cos(a) * spd, Math.sin(a) * spd - 3))
+      batch.push(mkParticle(mx, my, Math.cos(a) * spd, Math.sin(a) * spd - 3))
     }
-    forceUpdate((n) => n + 1)
+    addParticles(particlesRef.current, batch)
   }, [])
 
   const handleCardPop = useCallback((el: HTMLDivElement) => {
@@ -436,12 +512,13 @@ function About() {
     const containerRect = containerRef.current.getBoundingClientRect()
     const cx = rect.left + rect.width / 2 - containerRect.left
     const cy = rect.top + rect.height / 2 - containerRect.top
+    const batch: Particle[] = []
     for (let i = 0; i < 12; i++) {
       const a = Math.random() * Math.PI * 2
       const spd = Math.random() * 5 + 2
-      particlesRef.current.push(mkParticle(cx, cy, Math.cos(a) * spd, Math.sin(a) * spd - 3))
+      batch.push(mkParticle(cx, cy, Math.cos(a) * spd, Math.sin(a) * spd - 3))
     }
-    forceUpdate((n) => n + 1)
+    addParticles(particlesRef.current, batch)
     setTimeout(() => {
       el.style.transform = ''
     }, 150)
