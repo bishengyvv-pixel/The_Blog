@@ -4,6 +4,16 @@
 
 ---
 
+## 项目预览
+
+> 当前使用仓库内置的占位预览图，后续可直接替换 `docs/images/` 下对应文件为真实截图。
+
+| 首页 | 文章页 | About 页 |
+| --- | --- | --- |
+| ![首页预览](docs/images/preview-home.png) | ![About 页预览](docs/images/preview-about.png) | ![文章页预览](docs/images/preview-post.png) | 
+
+---
+
 ## 功能概览
 
 - Markdown 文章驱动，内容放在 `posts/*.md`
