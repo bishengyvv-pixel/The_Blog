@@ -5,11 +5,9 @@ import ThemeToggle from './ThemeToggle'
 const navItems = [
   { path: '/', label: '首页' },
   { path: '/posts', label: '文章' },
-  { path: '/categories', label: '分类' },
-  { path: '/tags', label: '标签' },
   { path: '/series', label: '专题' },
   { path: '/timeline', label: '时间线' },
-  { path: '/about', label: '关于' }
+  { path: '/about', label: '关于' },
 ]
 
 function Header() {
@@ -50,7 +48,7 @@ function Header() {
             The_Blog
           </Link>
 
-          <div className="hidden md:flex items-center gap-0.5">
+          <div className="hidden md:flex items-center gap-1.5">
             {navItems.map((item) => {
               const active = location.pathname === item.path
               return (
@@ -59,7 +57,7 @@ function Header() {
                   to={item.path}
                   className="text-sm font-medium"
                   style={{
-                    padding: '6px 14px',
+                    padding: '6px 16px',
                     borderRadius: '8px',
                     transition: 'background-color 0.25s ease, color 0.25s ease',
                     color: active ? 'var(--accent-color)' : 'var(--text-secondary)',

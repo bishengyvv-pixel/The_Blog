@@ -34,7 +34,7 @@ function getColors(isDark: boolean) {
   }
 }
 
-function TagCloud({ tags }: { tags: TagItem[] }) {
+function TagCloud({ tags, onTagClick }: { tags: TagItem[]; onTagClick?: (tag: string) => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [chips, setChips] = useState<Chip[]>([])
@@ -156,7 +156,9 @@ function TagCloud({ tags }: { tags: TagItem[] }) {
     const mx = e.clientX - rect.left
     const my = e.clientY - rect.top
     const hit = chips.find(c => mx >= c.x && mx <= c.x + c.w && my >= c.y && my <= c.y + c.h)
-    if (hit) navigate(`/tags/${hit.name}`)
+    if (!hit) return
+    if (onTagClick) onTagClick(hit.name)
+    else navigate(`/tags/${hit.name}`)
   }
 
   if (tags.length === 0) return null

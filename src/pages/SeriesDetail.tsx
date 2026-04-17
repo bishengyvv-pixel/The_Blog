@@ -42,7 +42,7 @@ function SeriesDetail() {
 
   if (posts.length === 0) {
     return (
-      <div className="container py-10 max-w-3xl mx-auto">
+      <div className="container py-8 md:py-12 max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold mb-8" style={{ color: 'var(--text-primary)' }}>
           {series}
         </h1>
@@ -54,7 +54,7 @@ function SeriesDetail() {
   }
 
   return (
-    <div className="container py-10 max-w-3xl mx-auto">
+    <div className="container py-8 md:py-12 max-w-3xl mx-auto">
       {/* 专题头 */}
       <header className="mb-8">
         <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>

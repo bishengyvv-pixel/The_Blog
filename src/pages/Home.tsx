@@ -32,7 +32,6 @@ export default function Home() {
     <div className="container py-8 md:py-12">
       <div className="flex gap-10 items-start">
 
-        {/* ── 左列 70%：最新文章 ── */}
         <main className="flex-[7] min-w-0">
           <div className="flex items-center justify-between mb-3">
             <h2
@@ -70,6 +69,7 @@ export default function Home() {
         {/* ── 右列 30%：侧边栏 ── */}
         <aside
           className="hidden lg:flex flex-col gap-6 flex-[3] min-w-0 sticky top-20"
+          style={{ maxHeight: 'calc(100vh - 7rem)', overflowY: 'auto' }}
         >
           {/* 诗词格言 */}
           <section
