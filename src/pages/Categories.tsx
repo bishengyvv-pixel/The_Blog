@@ -1,18 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { getCategoryDescription } from '../data/categories'
 import { getAllCategories } from '../utils/posts'
 import { useSEO } from '../hooks/useSEO'
 
-const categoryDescriptions: Record<string, string> = {
-  '前端': 'React、工程化、性能优化',
-  '运维': '服务器配置、Docker、CI/CD',
-  'JS逆向': '浏览器调试、混淆分析',
-  'JS 逆向': '浏览器调试、混淆分析',
-  'Python': '爬虫、自动化、数据分析'
-}
-
 function Categories() {
-  const [categories, setCategories] = useState<any[]>([])
+  const [categories, setCategories] = useState<Array<{ name: string; count: number }>>([])
 
   useSEO('分类', '按技术领域浏览文章分类。')
 
@@ -41,7 +34,7 @@ function Categories() {
               className="text-sm mb-3"
               style={{ color: 'var(--text-secondary)' }}
             >
-              {categoryDescriptions[cat.name] || '技术文章'}
+              {getCategoryDescription(cat.name)}
             </p>
             <span
               className="text-sm"

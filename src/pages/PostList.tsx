@@ -1,25 +1,13 @@
 import { useMemo, useState } from 'react'
-import { Code2, Server, Search, Terminal, Folder } from 'lucide-react'
+import CategorySection from '../components/CategorySection'
 import PostCard from '../components/PostCard'
-import { getAllPosts, getAllCategories, getAllTags } from '../utils/posts'
+import { getAllPosts, getAllTags } from '../utils/posts'
 import type { PostMeta } from '../utils/posts'
 import { useSEO } from '../hooks/useSEO'
-
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  '前端':    <Code2    size={14} />,
-  '运维':    <Server   size={14} />,
-  'JS逆向':  <Search   size={14} />,
-  'JS 逆向': <Search   size={14} />,
-  'Python':  <Terminal size={14} />,
-}
-function getCategoryIcon(name: string) {
-  return CATEGORY_ICONS[name] ?? <Folder size={14} />
-}
 
 const PAGE_SIZE = 10
 
 const allPosts: PostMeta[] = getAllPosts()
-const allCategories = getAllCategories()
 const allTags = getAllTags()
 
 function PostList() {
@@ -178,46 +166,14 @@ function PostList() {
             />
           </section>
 
-          {/* 分类 — Home 同款图标卡片 */}
-          {allCategories.length > 0 && (
-            <section>
-              <h3
-                className="text-sm font-semibold mb-3"
-                style={{ color: 'var(--text-tertiary)', letterSpacing: '0.06em' }}
-              >
-                分类
-              </h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                {allCategories.map(cat => {
-                  const active = filter?.type === 'category' && filter.value === cat.name
-                  return (
-                    <button
-                      key={cat.name}
-                      onClick={() => setFilterAndReset(active ? null : { type: 'category', value: cat.name })}
-                      className="flex items-center gap-1.5 rounded-lg text-sm transition-colors"
-                      style={{
-                        color: active ? '#fff' : 'var(--text-secondary)',
-                        background: active ? 'var(--accent-color)' : 'var(--bg-secondary)',
-                        border: `1px solid ${active ? 'var(--accent-color)' : 'var(--border-color)'}`,
-                        padding: '0.3rem 0.75rem',
-                        whiteSpace: 'nowrap',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s',
-                      }}
-                    >
-                      <span style={{ color: active ? '#fff' : 'var(--accent-color)', display: 'flex' }}>
-                        {getCategoryIcon(cat.name)}
-                      </span>
-                      {cat.name}
-                      <span style={{ color: active ? 'rgba(255,255,255,0.7)' : 'var(--text-tertiary)', fontSize: '0.7rem' }}>
-                        ({cat.count})
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
-            </section>
-          )}
+          <CategorySection
+            variant="button"
+            iconSize={14}
+            activeCategory={filter?.type === 'category' ? filter.value : null}
+            onCategorySelect={(category) =>
+              setFilterAndReset(category ? { type: 'category', value: category } : null)
+            }
+          />
 
           {/* 标签云 — 首页同款 badge */}
           {allTags.length > 0 && (

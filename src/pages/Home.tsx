@@ -1,28 +1,11 @@
 import { Link } from 'react-router-dom'
-import {
-  Code2, Server, Search, Terminal, Folder,
-} from 'lucide-react'
-
+import CategorySection from '../components/CategorySection'
 import PostCard from '../components/PostCard'
 import PoemTypewriter from '../components/PoemTypewriter'
-import { getAllPosts, getAllCategories, getAllTags } from '../utils/posts'
+import { getAllPosts, getAllTags } from '../utils/posts'
 import { useSEO } from '../hooks/useSEO'
 
-// 分类 → SVG 图标映射
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  '前端':    <Code2   size={15} />,
-  '运维':    <Server  size={15} />,
-  'JS逆向':  <Search  size={15} />,
-  'JS 逆向': <Search  size={15} />,
-  'Python':  <Terminal size={15} />,
-}
-
-function getCategoryIcon(name: string) {
-  return CATEGORY_ICONS[name] ?? <Folder size={15} />
-}
-
 const allPosts      = getAllPosts().slice(0, 8)
-const allCategories = getAllCategories()
 const allTags       = getAllTags().slice(0, 20)
 
 export default function Home() {
@@ -81,39 +64,7 @@ export default function Home() {
             <PoemTypewriter compact />
           </section>
 
-          {/* 分类浏览 */}
-          <section>
-            <h3
-              className="text-sm font-semibold mb-3"
-              style={{ color: 'var(--text-tertiary)', letterSpacing: '0.06em' }}
-            >
-              分类
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {allCategories.map(cat => (
-                <Link
-                  key={cat.name}
-                  to={`/categories/${cat.name}`}
-                  className="flex items-center gap-1.5 rounded-lg text-sm transition-colors"
-                  style={{
-                    color: 'var(--text-secondary)',
-                    background: 'var(--bg-secondary)',
-                    border: '1px solid var(--border-color)',
-                    padding: '0.3rem 0.75rem',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <span style={{ color: 'var(--accent-color)', display: 'flex' }}>
-                    {getCategoryIcon(cat.name)}
-                  </span>
-                  {cat.name}
-                  <span style={{ color: 'var(--text-tertiary)', fontSize: '0.7rem' }}>
-                    ({cat.count})
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </section>
+          <CategorySection />
 
           {/* 标签 */}
           {allTags.length > 0 && (

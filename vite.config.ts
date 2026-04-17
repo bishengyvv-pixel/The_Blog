@@ -9,9 +9,9 @@ export default defineConfig({
     tailwindcss(),
     react(),
     rssPlugin({
-      siteUrl: 'https://example.com',
-      siteTitle: '技术博客',
-      siteDescription: '个人技术博客，记录前端、运维、JS 逆向、Python 等技术学习历程。',
+      siteUrl: 'https://blog.bisheng.online',
+      siteTitle: 'The_Blog',
+      siteDescription: 'The_Blog is a personal blog about web development, programming, and technology.',
     }),
   ],
   resolve: {

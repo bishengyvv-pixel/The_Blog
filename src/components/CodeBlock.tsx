@@ -14,7 +14,6 @@ function CodeBlock({ code, language, className }: CodeBlockProps) {
   const displayLang = language ?? className?.replace('language-', '') ?? 'text'
   const lines = code.trimEnd().split('\n')
 
-  // 用 hljs 直接高亮原始字符串，保留所有空白和缩进
   const highlighted = useMemo(() => {
     const raw = code.trimEnd()
     try {
@@ -23,7 +22,6 @@ function CodeBlock({ code, language, className }: CodeBlockProps) {
       }
       return hljs.highlightAuto(raw).value
     } catch {
-      // 语言不支持时降级为纯文本（HTML 转义）
       return raw
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -44,7 +42,7 @@ function CodeBlock({ code, language, className }: CodeBlockProps) {
         borderRadius: '8px',
         overflow: 'hidden',
         border: '1px solid var(--border-color)',
-        background: '#282c34',  // atom-one-dark 背景色，固定深色
+        background: '#282c34',  
       }}
     >
       {/* 头部：语言 + 复制按钮 */}
