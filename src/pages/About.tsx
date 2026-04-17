@@ -1,40 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { ASCII_FOR, ASCII_ME, ASCII_NAME } from '../data/aboutAscii'
+import { INFO_CARDS, type AboutInfoCard } from '../data/aboutCards'
 import { useSEO } from '../hooks/useSEO'
-
-const ASCII_NAME = [
-  "                                          ,--,                     ,--.              ",
-  "    ,---,.     ,---,   .--.--.          ,--.'|     ,---,.        ,--.'|   ,----..    ",
-  "  ,'  .'  \\ ,`--.' |  /  /    '.     ,--,  | :   ,'  .' |    ,--,:  : |  /   /   \\   ",
-  ",---.' .' | |   :  : |  :  /`. /  ,---.'|  : ' ,---.'   | ,`--.'`|  ' : |   :     :  ",
-  "|   |  |: | :   |  ' ;  |  |--`   |   | : _' | |   |   .' |   :  :  | | .   |  ;. /  ",
-  ":   :  :  / |   :  | |  :  ;_     :   : |.'  | :   :  |-, :   |   \\ | : .   ; /--`   ",
-  ":   |    ;  '   '  ;  \\  \\    `.  |   ' '  ; : :   |  ;/| |   : '  '; | ;   | ;  __  ",
-  "|   :     \\ |   |  |   `----.   \\ '   |  .'. | |   :   .' '   ' ;.    ; |   : |.' .' ",
-  "|   |   . | '   :  ;   __ \\  \\  | |   | :  | ' |   |  |-, |   | | \\   | .   | '_.' : ",
-  "'   :  '; | |   |  '  /  /`--'  / '   : |  : ; '   :  ;/| '   : |  ; .' '   ; : \\  | ",
-  "|   |  | ;  '   :  | '--'.     /  |   | '  ,/  |   |    \\ |   | '`--'   '   | '/  .' ",
-  "|   :   /   ;   |.'    `--'---'   ;   : ;--'   |   :   .' '   : |       |   :    /   ",
-  "|   | ,'    '---'                 |   ,/       |   | ,'   ;   |.'        \\   \\ .'    ",
-  "`----'                            '---'        `----'     '---'           `---`      ",
-];
-
-const ASCII_FOR = [
-  '███████╗ ██████╗ ██████╗ ',
-  '██╔════╝██╔═══██╗██╔══██╗',
-  '█████╗  ██║   ██║██████╔╝',
-  '██╔══╝  ██║   ██║██╔══██╗',
-  '██║     ╚██████╔╝██║  ██║',
-  '╚═╝      ╚═════╝ ╚═╝  ╚═╝',
-]
-
-const ASCII_ME = [
-  '███╗   ███╗      ███████╗',
-  '████╗ ████║     ██╔════╝',
-  '██╔████╔██║     █████╗  ',
-  '██║╚██╔╝██║     ██╔══╝  ',
-  '██║ ╚═╝ ██║      ███████╗',
-  '╚═╝     ╚═╝      ╚══════╝',
-]
 
 const CHAR_POOL = [
   '😀','😂','🤣','😍','🥰','😎','🤩','🥳','😜','🤯','🥺','😱','🤖','👾','💀','🎃',
@@ -65,29 +32,6 @@ function addParticles(arr: Particle[], newOnes: Particle[]) {
   for (const p of newOnes) arr.push(p)
   if (arr.length > MAX_PARTICLES) arr.splice(0, arr.length - MAX_PARTICLES)
 }
-
-const INFO_CARDS = [
-  {
-    ascii: '┌───────────┐\n│  > skills        │\n└───────────┘',
-    label: 'stack',
-    value: 'React · TypeScript · K8s · Ceph',
-  },
-  {
-    ascii: '┌───────────┐\n│  ★ role          │\n└───────────┘',
-    label: 'identity',
-    value: 'Full-Stack & DevOps Architect',
-  },
-  {
-    ascii: '┌───────────┐\n│  ✉ contact       │\n└───────────┘',
-    label: 'reach me',
-    value: 'GitHub · Email',
-  },
-  {
-    ascii: '┌───────────┐\n│  ◈ philosophy    │\n└───────────┘',
-    label: 'motto',
-    value: 'Code as poetry, deploy as rhythm',
-  },
-]
 
 interface Particle {
   x: number
@@ -389,7 +333,7 @@ function InfoCard({
   card,
   onPop,
 }: {
-  card: (typeof INFO_CARDS)[0]
+  card: AboutInfoCard
   onPop: (el: HTMLDivElement) => void
 }) {
   const ref = useRef<HTMLDivElement>(null)
