@@ -1,3 +1,5 @@
+[![Linux Do 社区](https://img.shields.io/badge/Linux%20Do-%E7%A4%BE%E5%8C%BA-ea580c?style=flat-square&labelColor=52525b)](https://linux.do/)
+
 # The_Blog
 
 一个基于 `React + Vite + TypeScript` 的个人技术博客项目，面向静态内容发布，支持 Markdown 写作、分类 / 标签 / 专题聚合、时间线浏览、RSS 订阅，以及带 ASCII 互动效果的 About 页面。
@@ -345,3 +347,11 @@ About 页面信息卡片配置：
 - `src/data/` 配置说明
 - 文章 Frontmatter 字段
 - RSS / 部署配置
+
+---
+
+## 其他
+
+感谢linux.do等社区的开发者的支持
+
+---
