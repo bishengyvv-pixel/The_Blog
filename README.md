@@ -8,8 +8,6 @@
 
 ## 项目预览
 
-> 当前使用仓库内置的占位预览图，后续可直接替换 `docs/images/` 下对应文件为真实截图。
-
 | About 页 |
 | --- |
 | ![About 页预览](docs/images/preview-about.png) | 
