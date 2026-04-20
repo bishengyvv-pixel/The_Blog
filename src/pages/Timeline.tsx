@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import { useState, useEffect, useRef } from 'react'
-import { getAllPosts } from '../utils/posts'
+import { useState, useEffect, useRef, useMemo } from 'react'
+import { fetchPosts } from '../utils/api'
 import type { PostMeta } from '../utils/posts'
 import { useSEO } from '../hooks/useSEO'
 
@@ -39,10 +39,6 @@ function groupByYearMonth(posts: PostMeta[]): YearGroup[] {
         })),
     }))
 }
-
-const allPosts = getAllPosts()
-const groups   = groupByYearMonth(allPosts)
-const total    = allPosts.length
 
 const LABEL_W = 96
 const GAP     = 24
@@ -228,7 +224,35 @@ function YearSection({ yearGroup }: { yearGroup: YearGroup }) {
 }
 
 function Timeline() {
+  const [allPosts, setAllPosts] = useState<PostMeta[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetchPosts()
+      .then(posts => {
+        setAllPosts(posts)
+        setIsLoading(false)
+      })
+      .catch(() => {
+        setAllPosts([])
+        setIsLoading(false)
+      })
+  }, [])
+
+  const groups = useMemo(() => groupByYearMonth(allPosts), [allPosts])
+  const total = allPosts.length
+
   useSEO('时间线', '按时间顺序浏览全部文章。')
+
+  if (isLoading) {
+    return (
+      <div className="container py-8 md:py-12" style={{ maxWidth: '720px' }}>
+        <div className="card text-center py-16" style={{ color: 'var(--text-tertiary)' }}>
+          <p>加载中...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (total === 0) {
     return (

@@ -73,44 +73,61 @@ function TOC({ content }: TOCProps) {
   return (
     <nav
       aria-label="文章目录"
+      className="border-[3px] border-[var(--border-color)] p-4 bg-[var(--bg-secondary)] shadow-brutal-sm"
       style={{
         position: 'sticky',
         top: '5rem',
         maxHeight: 'calc(100vh - 8rem)',
         overflowY: 'auto',
-        paddingLeft: '1rem',
-        borderLeft: '2px solid var(--border-color)',
       }}
     >
       <p style={{
-        fontSize: '0.75rem',
-        fontWeight: 600,
+        fontSize: '1rem',
+        fontWeight: 900,
         letterSpacing: '0.08em',
         textTransform: 'uppercase',
-        color: 'var(--text-tertiary)',
-        marginBottom: '0.75rem',
+        color: 'var(--text-primary)',
+        marginBottom: '1rem',
+        borderBottom: '2px solid var(--border-color)',
+        paddingBottom: '0.5rem',
       }}>
         目录
       </p>
       <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
         {headings.map(h => (
-          <li key={h.id} style={{ marginBottom: '0.25rem' }}>
+          <li key={h.id} style={{ marginBottom: '0.5rem' }}>
             <a
               href={`#${h.id}`}
               onClick={e => {
                 e.preventDefault()
-                document.getElementById(h.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                document.getElementById(h.id)?.scrollIntoView({ behavior: 'auto', block: 'start' })
               }}
               style={{
                 display: 'block',
-                padding: '0.2rem 0',
-                paddingLeft: h.level === 3 ? '1rem' : 0,
-                fontSize: h.level === 3 ? '0.8rem' : '0.875rem',
-                color: activeId === h.id ? 'var(--accent-color)' : 'var(--text-secondary)',
-                fontWeight: activeId === h.id ? 600 : 400,
+                padding: '0.4rem 0.75rem',
+                paddingLeft: h.level === 3 ? '1.75rem' : '0.75rem',
+                fontSize: h.level === 3 ? '0.875rem' : '1rem',
+                color: activeId === h.id ? 'var(--text-primary)' : 'var(--text-secondary)',
+                fontWeight: activeId === h.id ? 900 : 700,
                 textDecoration: 'none',
-                transition: 'color 0.2s',
+                transition: 'none',
                 lineHeight: 1.4,
+                backgroundColor: activeId === h.id ? 'var(--accent-color)' : 'transparent',
+                border: activeId === h.id ? '2px solid var(--border-color)' : 'none',
+                boxShadow: activeId === h.id ? '2px 2px 0 0 var(--border-color)' : 'none',
+                transform: activeId === h.id ? 'translate(-2px, -2px)' : 'none',
+              }}
+              onMouseEnter={e => {
+                if (activeId !== h.id) {
+                  const target = e.currentTarget as HTMLElement
+                  target.style.backgroundColor = 'var(--nav-hover-bg)'
+                }
+              }}
+              onMouseLeave={e => {
+                if (activeId !== h.id) {
+                  const target = e.currentTarget as HTMLElement
+                  target.style.backgroundColor = 'transparent'
+                }
               }}
             >
               {h.text}

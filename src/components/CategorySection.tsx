@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { getCategoryIcon as getCategoryIconComponent } from '../data/categories'
-import { getAllCategories } from '../utils/posts'
 
 type CategoryItem = {
   name: string
@@ -32,7 +31,7 @@ function renderCategoryIcon(name: string, size: number) {
 
 export default function CategorySection({
   variant = 'link',
-  categories = getAllCategories(),
+  categories = [],
   activeCategory,
   onCategorySelect,
   iconSize = 15,
@@ -41,26 +40,26 @@ export default function CategorySection({
   if (categories.length === 0) return null
 
   return (
-    <section>
+    <section className="border-[3px] border-[var(--border-color)] p-4 bg-[var(--bg-secondary)] shadow-brutal-sm">
       <h3
-        className="text-sm font-semibold mb-3"
-        style={{ color: 'var(--text-tertiary)', letterSpacing: '0.06em' }}
+        className="text-sm font-black uppercase mb-4 tracking-wider"
+        style={{ color: 'var(--text-primary)', borderBottom: '2px solid var(--border-color)', paddingBottom: '0.5rem' }}
       >
         {title}
       </h3>
       <div className="flex flex-wrap gap-2">
         {categories.map((cat) => {
           const active = variant === 'button' && activeCategory === cat.name
-          const iconColor = active ? '#fff' : 'var(--accent-color)'
-          const countColor = active ? 'rgba(255,255,255,0.7)' : 'var(--text-tertiary)'
+          const iconColor = active ? 'var(--text-primary)' : 'var(--accent-color)'
+          const countColor = active ? 'var(--text-secondary)' : 'var(--text-tertiary)'
 
           const content = (
             <>
-              <span style={{ color: iconColor, display: 'flex' }}>
+              <span style={{ color: iconColor, display: 'flex', fontWeight: 'bold' }}>
                 {renderCategoryIcon(cat.name, iconSize)}
               </span>
-              {cat.name}
-              <span style={{ color: countColor, fontSize: '0.7rem' }}>
+              <span className="font-extrabold">{cat.name}</span>
+              <span style={{ color: countColor, fontSize: '0.75rem', fontWeight: '800' }}>
                 ({cat.count})
               </span>
             </>
@@ -77,15 +76,16 @@ export default function CategorySection({
                 key={cat.name}
                 type="button"
                 onClick={handleClick}
-                className="flex items-center gap-1.5 rounded-lg text-sm transition-colors"
+                className="flex items-center gap-1.5 text-sm transition-none border-[3px] border-[var(--border-color)] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-sm"
                 style={{
-                  color: active ? '#fff' : 'var(--text-secondary)',
-                  background: active ? 'var(--accent-color)' : 'var(--bg-secondary)',
-                  border: `1px solid ${active ? 'var(--accent-color)' : 'var(--border-color)'}`,
-                  padding: '0.3rem 0.75rem',
+                  color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  background: active ? 'var(--nav-active-bg)' : 'var(--bg-primary)',
+                  padding: '0.4rem 0.85rem',
                   whiteSpace: 'nowrap',
                   cursor: 'pointer',
-                  transition: 'all 0.15s',
+                  fontWeight: '800',
+                  boxShadow: active ? '2px 2px 0 0 var(--border-color)' : 'none',
+                  transform: active ? 'translate(-2px, -2px)' : 'none',
                 }}
               >
                 {content}
@@ -97,13 +97,13 @@ export default function CategorySection({
             <Link
               key={cat.name}
               to={`/categories/${cat.name}`}
-              className="flex items-center gap-1.5 rounded-lg text-sm transition-colors"
+              className="flex items-center gap-1.5 text-sm transition-none border-[3px] border-[var(--border-color)] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-sm hover:bg-[var(--nav-hover-bg)]"
               style={{
                 color: 'var(--text-secondary)',
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border-color)',
-                padding: '0.3rem 0.75rem',
+                background: 'var(--bg-primary)',
+                padding: '0.4rem 0.85rem',
                 whiteSpace: 'nowrap',
+                fontWeight: '800',
               }}
             >
               {content}

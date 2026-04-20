@@ -29,47 +29,49 @@ function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-[var(--bg-primary)]/95 backdrop-blur-sm shadow-md'
-          : 'bg-transparent'
-      }`}
-      style={{
-        borderBottom: isScrolled ? `1px solid var(--border-color)` : 'none'
-      }}
+      className="sticky top-0 z-50 bg-[var(--bg-primary)] border-b-[4px] border-[var(--border-color)] shadow-brutal-sm"
     >
       <div className="container">
         <nav className="flex items-center justify-between h-16">
           <Link
             to="/"
-            className="text-xl font-bold"
+            className="text-2xl font-black uppercase tracking-wider"
             style={{ color: 'var(--text-primary)' }}
           >
-            The_Blog
+            THE_BLOG
           </Link>
 
-          <div className="hidden md:flex items-center gap-1.5">
+          <div className="hidden md:flex items-center gap-2">
             {navItems.map((item) => {
               const active = location.pathname === item.path
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className="text-sm font-medium"
+                  className="text-sm font-extrabold uppercase px-4 py-2 border-[3px] border-[var(--border-color)] transition-none"
                   style={{
-                    padding: '6px 16px',
-                    borderRadius: '8px',
-                    transition: 'background-color 0.25s ease, color 0.25s ease',
-                    color: active ? 'var(--accent-color)' : 'var(--text-secondary)',
+                    color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
                     backgroundColor: active
                       ? 'var(--nav-active-bg)'
-                      : 'transparent',
+                      : 'var(--bg-secondary)',
+                    boxShadow: active ? '2px 2px 0 0 var(--border-color)' : 'none',
+                    transform: active ? 'translate(-2px, -2px)' : 'none',
                   }}
                   onMouseEnter={e => {
-                    if (!active) (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--nav-hover-bg)'
+                    const target = e.currentTarget as HTMLElement
+                    if (!active) {
+                      target.style.backgroundColor = 'var(--nav-hover-bg)'
+                      target.style.boxShadow = '2px 2px 0 0 var(--border-color)'
+                      target.style.transform = 'translate(-2px, -2px)'
+                    }
                   }}
                   onMouseLeave={e => {
-                    if (!active) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'
+                    const target = e.currentTarget as HTMLElement
+                    if (!active) {
+                      target.style.backgroundColor = 'var(--bg-secondary)'
+                      target.style.boxShadow = 'none'
+                      target.style.transform = 'none'
+                    }
                   }}
                 >
                   {item.label}
@@ -86,7 +88,7 @@ function Header() {
               className="btn-icon"
               aria-label="菜单"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 {mobileMenuOpen ? (
                   <>
                     <line x1="18" y1="6" x2="6" y2="18" />
@@ -106,24 +108,26 @@ function Header() {
 
         {mobileMenuOpen && (
           <div
-            className="md:hidden pb-4 border-t"
+            className="md:hidden pb-4 border-t-[3px]"
             style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}
           >
-            <div className="pt-4 flex flex-col gap-1">
+            <div className="pt-4 flex flex-col gap-2 px-2">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className="px-4 py-3 rounded-md text-base font-medium transition-colors duration-200"
+                  className="px-4 py-3 text-base font-extrabold uppercase border-[3px] border-[var(--border-color)]"
                   style={{
                     color:
                       location.pathname === item.path
-                        ? 'var(--accent-color)'
+                        ? 'var(--text-primary)'
                         : 'var(--text-secondary)',
                     backgroundColor:
                       location.pathname === item.path
-                        ? 'var(--bg-tertiary)'
-                        : 'transparent'
+                        ? 'var(--nav-active-bg)'
+                        : 'var(--bg-tertiary)',
+                    boxShadow: location.pathname === item.path ? '2px 2px 0 0 var(--border-color)' : 'none',
+                    transform: location.pathname === item.path ? 'translate(-2px, -2px)' : 'none',
                   }}
                 >
                   {item.label}

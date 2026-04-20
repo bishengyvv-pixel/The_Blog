@@ -1,15 +1,30 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getPostsBySeries } from '../utils/posts'
+import { fetchPosts } from '../utils/api'
 import type { PostMeta } from '../utils/posts'
 
 const STORAGE_KEY_PREFIX = 'blog-series-progress-'
 
 function SeriesDetail() {
   const { series } = useParams<{ series: string }>()
+  const [allPosts, setAllPosts] = useState<PostMeta[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetchPosts()
+      .then(posts => {
+        setAllPosts(posts)
+        setIsLoading(false)
+      })
+      .catch(() => {
+        setAllPosts([])
+        setIsLoading(false)
+      })
+  }, [])
+
   const posts = useMemo(
-    () => (series ? getPostsBySeries(series) : [] as PostMeta[]),
-    [series]
+    () => allPosts.filter(p => p.series === series).sort((a, b) => (a.seriesOrder || 0) - (b.seriesOrder || 0)),
+    [allPosts, series]
   )
 
   const storageKey = `${STORAGE_KEY_PREFIX}${series}`
@@ -39,6 +54,16 @@ function SeriesDetail() {
   }
 
   const progress = posts.length > 0 ? Math.round((completed.size / posts.length) * 100) : 0
+
+  if (isLoading) {
+    return (
+      <div className="container py-8 md:py-12 max-w-3xl mx-auto">
+        <div className="card text-center py-16" style={{ color: 'var(--text-tertiary)' }}>
+          <p>加载中...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (posts.length === 0) {
     return (

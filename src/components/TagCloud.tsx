@@ -27,10 +27,11 @@ const MAX_FONT = 28
 // 根据深色/浅色主题取色
 function getColors(isDark: boolean) {
   return {
-    bg: isDark ? '#262626' : '#f3f4f6',
-    text: isDark ? '#d4d4d4' : '#374151',
-    accent: isDark ? '#3b82f6' : '#2563eb',
-    hover: isDark ? '#1d4ed8' : '#1d4ed8',
+    bg: isDark ? '#1a1a1a' : '#f0f0f0',
+    text: isDark ? '#ffffff' : '#000000',
+    accent: '#ffcc00',
+    hover: '#ffaa00',
+    border: isDark ? '#ffffff' : '#000000',
   }
 }
 
@@ -66,7 +67,7 @@ function TagCloud({ tags, onTagClick }: { tags: TagItem[]; onTagClick?: (tag: st
     const measured = tags.map(tag => {
       const ratio = (tag.count - minCount) / range
       const fontSize = Math.round(MIN_FONT + ratio * (MAX_FONT - MIN_FONT))
-      const font = `${fontSize}px "Noto Serif SC", serif`
+      const font = `900 ${fontSize}px "Inter", "Montserrat", "Noto Sans SC", sans-serif`
       let textW = fontSize * tag.name.length * 0.65 // fallback
       try {
         const prepared = prepare(tag.name, font)
@@ -126,19 +127,23 @@ function TagCloud({ tags, onTagClick }: { tags: TagItem[]; onTagClick?: (tag: st
     const colors = getColors(isDark)
 
     chips.forEach(chip => {
-      // 圆角背景
-      const r = chip.h / 2
+      // 直角背景
       ctx.beginPath()
-      ctx.roundRect(chip.x, chip.y, chip.w, chip.h, r)
-      ctx.fillStyle = isDark ? '#374151' : '#e5e7eb'
+      ctx.rect(chip.x, chip.y, chip.w, chip.h)
+      ctx.fillStyle = colors.bg
       ctx.fill()
 
+      // 粗边框
+      ctx.lineWidth = 3
+      ctx.strokeStyle = colors.border
+      ctx.stroke()
+
       // 文字
-      ctx.font = `${chip.fontSize}px "Noto Serif SC", serif`
+      ctx.font = `900 ${chip.fontSize}px "Inter", "Montserrat", "Noto Sans SC", sans-serif`
       ctx.fillStyle = colors.text
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.fillText(chip.name, chip.x + chip.w / 2, chip.y + chip.h / 2)
+      ctx.fillText(chip.name.toUpperCase(), chip.x + chip.w / 2, chip.y + chip.h / 2)
     })
   }, [chips, canvasSize, isDark])
 

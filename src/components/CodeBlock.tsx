@@ -39,10 +39,9 @@ function CodeBlock({ code, language, className }: CodeBlockProps) {
       style={{
         position: 'relative',
         margin: '1.5rem 0',
-        borderRadius: '8px',
-        overflow: 'hidden',
-        border: '1px solid var(--border-color)',
-        background: '#282c34',  
+        border: '4px solid var(--border-color)',
+        background: '#000000',
+        boxShadow: '4px 4px 0 0 var(--border-color)',
       }}
     >
       {/* 头部：语言 + 复制按钮 */}
@@ -51,17 +50,18 @@ function CodeBlock({ code, language, className }: CodeBlockProps) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0.4rem 1rem',
-          background: 'rgba(0,0,0,0.25)',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          padding: '0.75rem 1rem',
+          background: 'var(--accent-color)',
+          borderBottom: '4px solid var(--border-color)',
         }}
       >
         <span
           style={{
-            fontSize: '0.72rem',
-            color: '#abb2bf',
+            fontSize: '0.875rem',
+            fontWeight: 900,
+            color: '#000000',
             fontFamily: 'JetBrains Mono, monospace',
-            textTransform: 'lowercase',
+            textTransform: 'uppercase',
             letterSpacing: '0.04em',
           }}
         >
@@ -71,7 +71,7 @@ function CodeBlock({ code, language, className }: CodeBlockProps) {
           onClick={handleCopy}
           className="code-copy-btn"
         >
-          Copy
+          COPY
         </button>
       </div>
 
@@ -84,12 +84,14 @@ function CodeBlock({ code, language, className }: CodeBlockProps) {
             padding: '1rem 0.75rem',
             textAlign: 'right',
             userSelect: 'none',
-            color: '#4b5263',
-            fontSize: '0.8rem',
+            color: '#666666',
+            fontSize: '0.875rem',
+            fontWeight: 700,
             lineHeight: '1.6',
             fontFamily: 'JetBrains Mono, monospace',
-            borderRight: '1px solid rgba(255,255,255,0.06)',
-            minWidth: '3rem',
+            borderRight: '3px solid var(--border-color)',
+            background: '#1a1a1a',
+            minWidth: '3.5rem',
             flexShrink: 0,
           }}
         >
@@ -103,12 +105,12 @@ function CodeBlock({ code, language, className }: CodeBlockProps) {
           style={{
             margin: 0,
             padding: '1rem',
-            background: 'transparent',
+            background: '#000000',
             border: 'none',
-            borderRadius: 0,
             flex: 1,
             minWidth: 0,
             fontSize: '0.875rem',
+            fontWeight: 700,
             lineHeight: '1.6',
             overflowX: 'visible',
           }}
@@ -120,6 +122,7 @@ function CodeBlock({ code, language, className }: CodeBlockProps) {
               background: 'transparent',
               padding: 0,
               fontSize: 'inherit',
+              fontWeight: 'inherit',
               lineHeight: 'inherit',
               fontFamily: 'JetBrains Mono, monospace',
               whiteSpace: 'pre',       // 保留所有空白和缩进

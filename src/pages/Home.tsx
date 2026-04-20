@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import CategorySection from '../components/CategorySection'
 import PostCard from '../components/PostCard'
-import PoemTypewriter from '../components/PoemTypewriter'
+import NavSidebar from '../components/NavSidebar'
 import { fetchPosts } from '../utils/api'
 import { useSEO } from '../hooks/useSEO'
 import type { PostMeta } from '../utils/posts'
@@ -10,6 +9,7 @@ import type { PostMeta } from '../utils/posts'
 export default function Home() {
   const [recentPosts, setRecentPosts] = useState<PostMeta[]>([])
   const [tags, setTags] = useState<Array<{ name: string; count: number }>>([])
+  const [categories, setCategories] = useState<Array<{ name: string; count: number }>>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useSEO(undefined, '个人技术博客，记录前端、运维、JS 逆向、Python 等技术学习历程。')
@@ -32,6 +32,17 @@ export default function Home() {
           .slice(0, 20)
 
         setTags(sortedTags)
+
+        // 计算分类
+        const categoryMap = new Map<string, number>()
+        posts.forEach(post => {
+          categoryMap.set(post.category, (categoryMap.get(post.category) || 0) + 1)
+        })
+        const sortedCategories = Array.from(categoryMap.entries())
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count)
+
+        setCategories(sortedCategories)
         setIsLoading(false)
       })
       .catch(() => {
@@ -46,22 +57,22 @@ export default function Home() {
       <div className="flex gap-10 items-start">
 
         <main className="flex-[7] min-w-0">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-5">
             <h2
-              className="text-xl font-bold"
+              className="text-2xl font-black uppercase tracking-wider"
               style={{ color: 'var(--text-primary)' }}
             >
               最新文章
             </h2>
             <Link
               to="/posts"
-              className="text-sm"
-              style={{ color: 'var(--accent-color)' }}
+              className="btn text-sm font-extrabold uppercase"
+              style={{ color: 'var(--text-primary)' }}
             >
-              查看全部 →
+              查看全部
             </Link>
           </div>
-          <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', marginBottom: '1.25rem' }} />
+          <hr style={{ border: 'none', borderTop: '4px solid var(--border-color)', marginBottom: '2rem' }} />
 
           <div className="grid gap-3">
             {isLoading ? (
@@ -84,46 +95,7 @@ export default function Home() {
         </main>
 
         {/* ── 右列 30%：侧边栏 ── */}
-        <aside
-          className="hidden lg:flex flex-col gap-6 flex-[3] min-w-0 sticky top-20"
-          style={{ maxHeight: 'calc(100vh - 7rem)', overflowY: 'auto' }}
-        >
-          {/* 诗词格言 */}
-          <section
-            style={{
-              borderLeft: '2px solid var(--border-color)',
-              paddingLeft: '1rem',
-            }}
-          >
-            <PoemTypewriter compact />
-          </section>
-
-          <CategorySection />
-
-          {/* 标签 */}
-          {tags.length > 0 && (
-            <section>
-              <h3
-                className="text-sm font-semibold mb-3"
-                style={{ color: 'var(--text-tertiary)', letterSpacing: '0.06em' }}
-              >
-                标签
-              </h3>
-              <div className="flex flex-wrap gap-1.5">
-                {tags.map(tag => (
-                  <Link
-                    key={tag.name}
-                    to={`/tags/${tag.name}`}
-                    className="badge"
-                    style={{ fontSize: '0.7rem', padding: '0.15rem 0.55rem' }}
-                  >
-                    #{tag.name}
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-        </aside>
+        <NavSidebar categories={categories} tags={tags} />
 
       </div>
     </div>

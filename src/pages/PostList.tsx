@@ -41,6 +41,17 @@ function PostList() {
       .sort((a, b) => b.count - a.count)
   }, [allPosts])
 
+  // 计算分类
+  const allCategories = useMemo(() => {
+    const categoryMap = new Map<string, number>()
+    allPosts.forEach(post => {
+      categoryMap.set(post.category, (categoryMap.get(post.category) || 0) + 1)
+    })
+    return Array.from(categoryMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+  }, [allPosts])
+
   const filtered = useMemo(() => {
     let result = allPosts
     if (filter) {
@@ -204,6 +215,7 @@ function PostList() {
 
           <CategorySection
             variant="button"
+            categories={allCategories}
             iconSize={14}
             activeCategory={filter?.type === 'category' ? filter.value : null}
             onCategorySelect={(category) =>
