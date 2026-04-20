@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    container_name: the_blog_frontend
+    networks:
+      - blog_network
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+    volumes:
+      - ./posts:/posts:ro
+    restart: unless-stopped
+    container_name: the_blog_backend
+    networks:
+      - blog_network
+
+networks:
+  blog_network:
+    driver: bridge
