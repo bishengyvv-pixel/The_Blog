@@ -303,9 +303,88 @@ About 页面信息卡片配置：
 
 ---
 
-## 部署建议
+## Docker 部署
 
-这是一个纯前端静态站点，构建完成后可直接部署到任意静态托管平台，例如：
+本项目支持通过 Docker 容器化部署，包含前后端分离架构：
+
+### 1. 项目结构
+
+```
+.
+├── Dockerfile              # 前端容器配置
+├── docker-compose.yml      # 容器编排配置
+├── nginx.conf              # Nginx 代理配置
+├── server/                 # 后端 API 服务
+│   ├── Dockerfile         # 后端容器配置
+│   ├── src/              # 后端源代码
+│   └── package.json      # 后端依赖
+└── posts/                 # Markdown 文章目录
+```
+
+### 2. 服务架构
+
+- **前端容器** (`frontend`): Nginx + 构建后的静态文件，端口 80
+- **后端容器** (`backend`): Node.js + Express API，端口 3001
+
+前端通过 Nginx 反向代理将 `/api` 请求转发到后端服务。
+
+### 3. 启动服务
+
+```bash
+# 构建并启动所有服务
+docker-compose up -d
+
+# 查看服务状态
+docker-compose ps
+
+# 查看日志
+docker-compose logs -f
+
+# 停止服务
+docker-compose down
+```
+
+### 4. 构建选项
+
+```bash
+# 重新构建镜像（代码更新后）
+docker-compose up -d --build
+
+# 仅构建不启动
+docker-compose build
+
+# 清理构建缓存
+docker-compose build --no-cache
+```
+
+### 5. 环境变量
+
+前端构建时可通过环境变量配置 API 地址：
+```bash
+# 在 Dockerfile 中设置
+ENV VITE_API_BASE=/api
+```
+
+后端支持的环境变量：
+```bash
+PORT=3001           # 服务端口
+NODE_ENV=production # 运行环境
+```
+
+### 6. 数据持久化
+
+- 文章目录 (`./posts`) 通过卷挂载到后端容器
+- 构建产物在容器内生成，不持久化
+
+### 7. 网络配置
+
+容器通过 `blog_network` 网络通信，前端通过服务名 `backend` 访问后端 API。
+
+---
+
+## 静态托管部署
+
+这是一个纯前端静态站点，构建完成后也可直接部署到任意静态托管平台，例如：
 
 - Vercel
 - Netlify
