@@ -1,11 +1,49 @@
-import { getAllTags } from '../utils/posts'
+import { useEffect, useState } from 'react'
 import TagCloud from '../components/TagCloud'
+import { fetchPosts } from '../utils/api'
 import { useSEO } from '../hooks/useSEO'
-
-const tags = getAllTags()
+import type { PostMeta } from '../utils/posts'
 
 function Tags() {
+  const [tags, setTags] = useState<Array<{ name: string; count: number }>>([])
+  const [isLoading, setIsLoading] = useState(true)
+
   useSEO('标签', '按标签浏览所有文章。')
+
+  useEffect(() => {
+    setIsLoading(true)
+    fetchPosts()
+      .then(posts => {
+        const tagMap = new Map<string, number>()
+        posts.forEach(post => {
+          post.tags.forEach(tag => {
+            tagMap.set(tag, (tagMap.get(tag) || 0) + 1)
+          })
+        })
+        const tags = Array.from(tagMap.entries())
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count)
+        setTags(tags)
+        setIsLoading(false)
+      })
+      .catch(() => {
+        setTags([])
+        setIsLoading(false)
+      })
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="container py-10">
+        <h1 className="text-3xl font-bold mb-8" style={{ color: 'var(--text-primary)' }}>
+          标签
+        </h1>
+        <div className="card text-center py-16" style={{ color: 'var(--text-tertiary)' }}>
+          <p>加载中...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (tags.length === 0) {
     return (

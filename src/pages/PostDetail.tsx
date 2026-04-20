@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
 
-import { getPostBySlug, getAllPosts } from '../utils/posts'
+import { fetchPostBySlug, fetchPosts } from '../utils/api'
 import { estimateReadingTime } from '../utils/readingTime'
 import type { PostMeta } from '../utils/posts'
 import CodeBlock from '../components/CodeBlock'
@@ -16,17 +16,38 @@ function PostDetail() {
   const [post, setPost] = useState<{ meta: PostMeta; content: string } | null>(null)
   const [prevPost, setPrevPost] = useState<PostMeta | null>(null)
   const [nextPost, setNextPost] = useState<PostMeta | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!slug) return
-    const data = getPostBySlug(slug)
-    if (!data) return
-    setPost(data)
 
-    const all = getAllPosts()
-    const idx = all.findIndex(p => p.slug === slug)
-    setPrevPost(idx > 0 ? all[idx - 1] : null)
-    setNextPost(idx < all.length - 1 ? all[idx + 1] : null)
+    setIsLoading(true)
+    setError(null)
+
+    Promise.all([
+      fetchPostBySlug(slug),
+      fetchPosts()
+    ])
+      .then(([postData, allPosts]) => {
+        if (!postData) {
+          setError('文章不存在')
+          setIsLoading(false)
+          return
+        }
+
+        setPost(postData)
+
+        const idx = allPosts.findIndex(p => p.slug === slug)
+        setPrevPost(idx > 0 ? allPosts[idx - 1] : null)
+        setNextPost(idx < allPosts.length - 1 ? allPosts[idx + 1] : null)
+
+        setIsLoading(false)
+      })
+      .catch((err) => {
+        setError(err.message || '加载文章失败')
+        setIsLoading(false)
+      })
   }, [slug])
 
   const readingTime = useMemo(
@@ -36,11 +57,21 @@ function PostDetail() {
 
   useSEO(post?.meta.title, post?.meta.summary)
 
-  if (!post) {
+  if (isLoading) {
     return (
       <div className="container py-10">
         <div className="card text-center py-16" style={{ color: 'var(--text-tertiary)' }}>
-          <p>文章不存在</p>
+          <p>加载中...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !post) {
+    return (
+      <div className="container py-10">
+        <div className="card text-center py-16" style={{ color: 'var(--text-tertiary)' }}>
+          <p>{error || '文章不存在'}</p>
         </div>
       </div>
     )

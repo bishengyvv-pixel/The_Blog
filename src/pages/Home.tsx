@@ -1,15 +1,45 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import CategorySection from '../components/CategorySection'
 import PostCard from '../components/PostCard'
 import PoemTypewriter from '../components/PoemTypewriter'
-import { getAllPosts, getAllTags } from '../utils/posts'
+import { fetchPosts } from '../utils/api'
 import { useSEO } from '../hooks/useSEO'
-
-const allPosts      = getAllPosts().slice(0, 8)
-const allTags       = getAllTags().slice(0, 20)
+import type { PostMeta } from '../utils/posts'
 
 export default function Home() {
+  const [recentPosts, setRecentPosts] = useState<PostMeta[]>([])
+  const [tags, setTags] = useState<Array<{ name: string; count: number }>>([])
+  const [isLoading, setIsLoading] = useState(true)
+
   useSEO(undefined, '个人技术博客，记录前端、运维、JS 逆向、Python 等技术学习历程。')
+
+  useEffect(() => {
+    fetchPosts()
+      .then(posts => {
+        setRecentPosts(posts.slice(0, 8))
+
+        // 计算标签
+        const tagMap = new Map<string, number>()
+        posts.forEach(post => {
+          post.tags.forEach(tag => {
+            tagMap.set(tag, (tagMap.get(tag) || 0) + 1)
+          })
+        })
+        const sortedTags = Array.from(tagMap.entries())
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 20)
+
+        setTags(sortedTags)
+        setIsLoading(false)
+      })
+      .catch(() => {
+        setRecentPosts([])
+        setTags([])
+        setIsLoading(false)
+      })
+  }, [])
 
   return (
     <div className="container py-8 md:py-12">
@@ -34,8 +64,12 @@ export default function Home() {
           <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', marginBottom: '1.25rem' }} />
 
           <div className="grid gap-3">
-            {allPosts.length > 0 ? (
-              allPosts.map(post => (
+            {isLoading ? (
+              <div className="card text-center py-12" style={{ color: 'var(--text-tertiary)' }}>
+                <p>加载中...</p>
+              </div>
+            ) : recentPosts.length > 0 ? (
+              recentPosts.map(post => (
                 <PostCard key={post.slug} {...post} />
               ))
             ) : (
@@ -67,7 +101,7 @@ export default function Home() {
           <CategorySection />
 
           {/* 标签 */}
-          {allTags.length > 0 && (
+          {tags.length > 0 && (
             <section>
               <h3
                 className="text-sm font-semibold mb-3"
@@ -76,7 +110,7 @@ export default function Home() {
                 标签
               </h3>
               <div className="flex flex-wrap gap-1.5">
-                {allTags.map(tag => (
+                {tags.map(tag => (
                   <Link
                     key={tag.name}
                     to={`/tags/${tag.name}`}

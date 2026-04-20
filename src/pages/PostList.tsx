@@ -1,21 +1,45 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import CategorySection from '../components/CategorySection'
 import PostCard from '../components/PostCard'
-import { getAllPosts, getAllTags } from '../utils/posts'
+import { fetchPosts } from '../utils/api'
 import type { PostMeta } from '../utils/posts'
 import { useSEO } from '../hooks/useSEO'
 
 const PAGE_SIZE = 10
 
-const allPosts: PostMeta[] = getAllPosts()
-const allTags = getAllTags()
-
 function PostList() {
+  const [allPosts, setAllPosts] = useState<PostMeta[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [filter, setFilter] = useState<{ type: 'category' | 'tag'; value: string } | null>(null)
   const [search, setSearch] = useState('')
 
   useSEO('文章', '浏览全部技术文章，支持按分类和标签筛选。')
+
+  useEffect(() => {
+    fetchPosts()
+      .then(posts => {
+        setAllPosts(posts)
+        setIsLoading(false)
+      })
+      .catch(() => {
+        setAllPosts([])
+        setIsLoading(false)
+      })
+  }, [])
+
+  // 计算标签
+  const allTags = useMemo(() => {
+    const tagMap = new Map<string, number>()
+    allPosts.forEach(post => {
+      post.tags.forEach(tag => {
+        tagMap.set(tag, (tagMap.get(tag) || 0) + 1)
+      })
+    })
+    return Array.from(tagMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+  }, [allPosts])
 
   const filtered = useMemo(() => {
     let result = allPosts
@@ -32,7 +56,7 @@ function PostList() {
       )
     }
     return result
-  }, [filter, search])
+  }, [allPosts, filter, search])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -50,6 +74,18 @@ function PostList() {
   function handleTagClick(tag: string) {
     const active = filter?.type === 'tag' && filter.value === tag
     setFilterAndReset(active ? null : { type: 'tag', value: tag })
+  }
+
+  if (isLoading) {
+    return (
+      <div className="container py-8 md:py-12">
+        <div className="max-w-4xl mx-auto">
+          <div className="card text-center py-16" style={{ color: 'var(--text-tertiary)' }}>
+            <p>加载中...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -93,7 +129,7 @@ function PostList() {
             </div>
           ) : (
             <div className="card text-center" style={{ padding: '4rem 2rem', color: 'var(--text-tertiary)' }}>
-              暂无文章
+              {allPosts.length === 0 ? '暂无文章' : '没有找到符合条件的文章'}
             </div>
           )}
 

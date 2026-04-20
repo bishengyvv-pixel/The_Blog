@@ -1,17 +1,44 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getCategoryDescription } from '../data/categories'
-import { getAllCategories } from '../utils/posts'
+import { fetchPosts } from '../utils/api'
 import { useSEO } from '../hooks/useSEO'
+import type { PostMeta } from '../utils/posts'
 
 function Categories() {
   const [categories, setCategories] = useState<Array<{ name: string; count: number }>>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useSEO('分类', '按技术领域浏览文章分类。')
 
   useEffect(() => {
-    setCategories(getAllCategories())
+    setIsLoading(true)
+    fetchPosts()
+      .then(posts => {
+        const categoryMap = new Map<string, number>()
+        posts.forEach(post => {
+          categoryMap.set(post.category, (categoryMap.get(post.category) || 0) + 1)
+        })
+        const categories = Array.from(categoryMap.entries())
+          .map(([name, count]) => ({ name, count }))
+        setCategories(categories)
+        setIsLoading(false)
+      })
+      .catch(() => {
+        setCategories([])
+        setIsLoading(false)
+      })
   }, [])
+
+  if (isLoading) {
+    return (
+      <div className="container py-10">
+        <div className="card text-center py-16" style={{ color: 'var(--text-tertiary)' }}>
+          <p>加载中...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="container py-10">
