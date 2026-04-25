@@ -28,6 +28,15 @@ function PostList() {
       })
   }, [])
 
+  // 计算分类
+  const allCategories = useMemo(() => {
+    const catMap = new Map<string, number>()
+    allPosts.forEach(post => {
+      catMap.set(post.category, (catMap.get(post.category) || 0) + 1)
+    })
+    return Array.from(catMap.entries()).map(([name, count]) => ({ name, count }))
+  }, [allPosts])
+
   // 计算标签
   const allTags = useMemo(() => {
     const tagMap = new Map<string, number>()
@@ -204,6 +213,7 @@ function PostList() {
 
           <CategorySection
             variant="button"
+            categories={allCategories}
             iconSize={14}
             activeCategory={filter?.type === 'category' ? filter.value : null}
             onCategorySelect={(category) =>

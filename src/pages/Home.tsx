@@ -9,6 +9,7 @@ import type { PostMeta } from '../utils/posts'
 
 export default function Home() {
   const [recentPosts, setRecentPosts] = useState<PostMeta[]>([])
+  const [categories, setCategories] = useState<Array<{ name: string; count: number }>>([])
   const [tags, setTags] = useState<Array<{ name: string; count: number }>>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -18,6 +19,13 @@ export default function Home() {
     fetchPosts()
       .then(posts => {
         setRecentPosts(posts.slice(0, 8))
+
+        // 计算分类
+        const catMap = new Map<string, number>()
+        posts.forEach(post => {
+          catMap.set(post.category, (catMap.get(post.category) || 0) + 1)
+        })
+        setCategories(Array.from(catMap.entries()).map(([name, count]) => ({ name, count })))
 
         // 计算标签
         const tagMap = new Map<string, number>()
@@ -36,6 +44,7 @@ export default function Home() {
       })
       .catch(() => {
         setRecentPosts([])
+        setCategories([])
         setTags([])
         setIsLoading(false)
       })
@@ -98,7 +107,7 @@ export default function Home() {
             <PoemTypewriter compact />
           </section>
 
-          <CategorySection />
+          <CategorySection categories={categories} />
 
           {/* 标签 */}
           {tags.length > 0 && (

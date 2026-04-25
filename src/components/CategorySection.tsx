@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { getCategoryIcon as getCategoryIconComponent } from '../data/categories'
-import { getAllCategories } from '../utils/posts'
 
 type CategoryItem = {
   name: string
@@ -10,7 +9,7 @@ type CategoryItem = {
 type CategorySectionProps =
   | {
       variant?: 'link'
-      categories?: CategoryItem[]
+      categories: CategoryItem[]
       activeCategory?: never
       onCategorySelect?: never
       iconSize?: number
@@ -18,7 +17,7 @@ type CategorySectionProps =
     }
   | {
       variant: 'button'
-      categories?: CategoryItem[]
+      categories: CategoryItem[]
       activeCategory?: string | null
       onCategorySelect: (category: string | null) => void
       iconSize?: number
@@ -32,7 +31,7 @@ function renderCategoryIcon(name: string, size: number) {
 
 export default function CategorySection({
   variant = 'link',
-  categories = getAllCategories(),
+  categories,
   activeCategory,
   onCategorySelect,
   iconSize = 15,
