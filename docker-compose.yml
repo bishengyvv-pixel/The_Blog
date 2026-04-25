@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        VITE_API_BASE: ${VITE_API_BASE:-/api}
     ports:
       - "80:80"
     depends_on:
@@ -21,8 +23,10 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - PORT=3001
-      - NODE_ENV=production
+      - PORT=${PORT:-3001}
+      - NODE_ENV=${NODE_ENV:-production}
+      - DEBUG=${DEBUG:-false}
+      - CORS_ORIGINS=${CORS_ORIGINS:-}
     volumes:
       - ./posts:/posts:ro
     restart: unless-stopped

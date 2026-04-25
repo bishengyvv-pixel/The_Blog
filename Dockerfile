@@ -10,8 +10,9 @@ COPY package*.json ./
 # 安装依赖
 RUN npm ci --only=production
 
-# 设置构建时的环境变量
-ENV VITE_API_BASE=/api
+# 构建时环境变量（可通过 docker-compose build args 覆盖）
+ARG VITE_API_BASE=/api
+ENV VITE_API_BASE=$VITE_API_BASE
 
 # 复制源代码
 COPY . .
