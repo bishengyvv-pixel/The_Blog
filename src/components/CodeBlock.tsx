@@ -1,6 +1,6 @@
 import { useMemo, useRef } from 'react'
 import hljs from 'highlight.js'
-import 'highlight.js/styles/atom-one-dark.css'
+import 'highlight.js/styles/github-dark.css'
 
 interface CodeBlockProps {
   code: string
@@ -42,7 +42,7 @@ function CodeBlock({ code, language, className }: CodeBlockProps) {
         borderRadius: '8px',
         overflow: 'hidden',
         border: '1px solid var(--border-color)',
-        background: '#282c34',  
+        background: '#2d3339',
       }}
     >
       {/* 头部：语言 + 复制按钮 */}
@@ -52,14 +52,14 @@ function CodeBlock({ code, language, className }: CodeBlockProps) {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '0.4rem 1rem',
-          background: 'rgba(0,0,0,0.25)',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          background: '#22272e',
+          borderBottom: '1px solid #373e47',
         }}
       >
         <span
           style={{
             fontSize: '0.72rem',
-            color: '#abb2bf',
+            color: '#8b949e',
             fontFamily: 'JetBrains Mono, monospace',
             textTransform: 'lowercase',
             letterSpacing: '0.04em',
@@ -84,11 +84,11 @@ function CodeBlock({ code, language, className }: CodeBlockProps) {
             padding: '1rem 0.75rem',
             textAlign: 'right',
             userSelect: 'none',
-            color: '#4b5263',
+            color: '#768390',
             fontSize: '0.8rem',
             lineHeight: '1.6',
             fontFamily: 'JetBrains Mono, monospace',
-            borderRight: '1px solid rgba(255,255,255,0.06)',
+            borderRight: '1px solid #373e47',
             minWidth: '3rem',
             flexShrink: 0,
           }}

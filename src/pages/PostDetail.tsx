@@ -221,7 +221,7 @@ function PostDetail() {
               className="text-sm text-center mb-8"
               style={{ color: 'var(--text-tertiary)' }}
             >
-              © {new Date().getFullYear()} 技术博客 · 本文遵循 CC BY-NC-SA 4.0 协议
+
             </p>
 
             {/* 上一篇 / 下一篇 */}
