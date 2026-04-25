@@ -16,10 +16,8 @@ interface ApiResponse<T> {
  * 获取文章列表
  */
 export async function fetchPosts(includeDrafts = false): Promise<PostMeta[]> {
-  const url = new URL(`${API_BASE}/posts`)
-  if (includeDrafts) url.searchParams.set('drafts', 'true')
-
-  const res = await fetch(url)
+  const query = includeDrafts ? '?drafts=true' : ''
+  const res = await fetch(`${API_BASE}/posts${query}`)
   const json: ApiResponse<PostMeta[]> = await res.json()
 
   if (!json.success || !json.data) {
