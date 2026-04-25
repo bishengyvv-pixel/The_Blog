@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # 安装依赖
-RUN npm ci --only=production
+RUN npm install
 
 # 构建时环境变量（可通过 docker-compose build args 覆盖）
 ARG VITE_API_BASE=/api
